@@ -1,0 +1,158 @@
+# -*- coding: utf-8 -*-
+
+import numpy as np
+import matplotlib.pyplot as plt
+import itertools
+import random, glob
+import matplotlib.cm as cm, IPython.display as IPdisplay 
+from mpl_toolkits.mplot3d import Axes3D
+from pylab import *
+
+
+input_data = np.genfromtxt('C:input_path.csv', delimiter=',', dtype = np.float64)
+log_data = np.genfromtxt('C:log.csv',skiprows = 2, delimiter=',',dtype = np.float64)
+
+    
+#####################from the first chart########################
+t1 = []
+t2 = []
+count1 = 0
+i = 0.0
+j = 0.0
+while count1 < 39:
+    t1.append(i)    
+    i += 0.15
+    count1 += 1
+count2 = 0
+while count2 < 2905:
+    t2.append(j)
+    j += 0.002 
+    count2 += 1
+    
+x1 = np.round(input_data[:,7] * 1000)
+y1 = np.round(input_data[:,8] * 1000)
+z1 = np.round(input_data[:,9] * 1000)
+
+Fx1 = np.round(input_data[:,1], 2)
+Fy1 = np.round(input_data[:,2], 2)
+Fz1 = np.round(input_data[:,3], 2)
+
+#normalize
+Px1 = [a - x1[0] for a in x1]
+Py1 = [a - y1[0] for a in y1]
+Pz1 = [a - z1[0] for a in z1]
+################################################################
+
+###############from the second chart############################
+x2 = np.round(log_data[:,15]* 1000, 2) #msr data
+y2 = np.round(log_data[:,16]* 1000, 2) #msr data
+z2 = np.round(log_data[:,17]* 1000, 2) #msr data
+
+Fx2 = np.round(log_data[:,6], 2)
+Fy2 = np.round(log_data[:,7], 2)
+Fz2 = np.round(log_data[:,8], 2) 
+
+Dead_x = np.round(log_data[:,0], 2)
+Dead_y = np.round(log_data[:,1], 2)
+Dead_z = np.round(log_data[:,2], 2)
+
+Pid_x = np.round(log_data[:,18]*1000, 2)
+Pid_y = np.round(log_data[:,19]*1000, 2)
+Pid_z = np.round(log_data[:,20]*1000, 2)
+
+#normalize
+Px2 = [a - x2[0] for a in x2]
+Py2 = [a - y2[0] for a in y2]
+Pz2 = [a - z2[0] for a in z2]
+################################################################
+
+#########################Draws graph############################
+fig = plt.figure(figsize=(12,21))
+'''
+def Graph_3D(x_pos, x, y, z, Color, Label, x_Label, y_Label, z_Label):
+    ax = plt.subplot2grid((15,3), (x_pos,0),colspace = 3, rowspace = 3, projection = '3d')
+    ax.plot(x, y, z, color = Color, label = Label)
+    ax.set_xlabel(x_Label)
+    ax.set_ylabel(y_Label)
+    ax.set_zlabel(z_Label)
+    ax.autoscale()
+    plt.show
+'''
+
+ax1 = plt.subplot2grid((17, 3), (0, 0), colspan=3, rowspan=3, projection='3d')
+ax1.plot(Px1,Py1,Pz1,'-',color = 'black', label = 'Path Followed')
+ax1.plot(Px2,Py2,Pz2,color = 'red')
+ax1.set_xlabel('X')
+ax1.set_ylabel('Y')
+ax1.set_zlabel('Z')
+ax1.autoscale()
+
+ax2 = plt.subplot2grid((17, 3), (4, 0), colspan=3, rowspan=3, projection='3d')
+ax2.plot(Fx1,Fy1,Fz1,'-',color = 'black', label = 'Force Path')
+ax2.plot(Fx2,Fy2,Fz2,color = 'red')
+ax2.set_xlabel('FX')
+ax2.set_ylabel('FY')
+ax2.set_zlabel('FZ')
+ax2.autoscale()
+
+ax3 = plt.subplot2grid((17, 3), (8, 0), colspan=3, rowspan=1)
+ax3.plot(t1,Px1,color='black')
+ax3.plot(t2,Px2,color='red')
+ax3.set_ylabel('X (Global) [mm]')
+ax3.autoscale()
+
+ax4 = plt.subplot2grid((17, 3), (9, 0), colspan=3, rowspan=1)
+ax4.plot(t1,Py1,color='black')
+ax4.plot(t2,Py2,color='red')
+ax4.set_ylabel('Y (Global) [mm]')
+ax4.autoscale()
+
+ax5 = plt.subplot2grid((17, 3), (10, 0), colspan=3, rowspan=1)
+ax5.plot(t1,Pz1,color='black')
+ax5.plot(t2,Pz2,color='red')
+ax5.set_ylabel('Z (Global) [mm]')
+ax5.autoscale()
+
+ax6 = plt.subplot2grid((17, 3), (11, 0), colspan=3, rowspan=1)
+ax6.plot(t2,Pid_x,color='black')
+ax6.set_ylabel('PID X (Tool) [mm]')
+ax6.autoscale()
+
+ax7 = plt.subplot2grid((17, 3), (12, 0), colspan=3, rowspan=1)
+ax7.plot(t2,Pid_y,color='black')
+ax7.set_ylabel('PID Y (Tool) [mm]')
+ax7.autoscale()
+
+ax8 = plt.subplot2grid((17, 3), (13, 0), colspan=3, rowspan=1)
+ax8.plot(t2,Pid_z,color='black')
+ax8.set_ylabel('PID Z (Tool) [mm]')
+ax8.autoscale()
+
+ax9 = plt.subplot2grid((17, 3), (14, 0), colspan=3, rowspan=1)
+ax9.plot(t1,Fx1,color='black')
+ax9.plot(t2,Fx2,color='red')
+ax9.set_ylabel('Fx (Tool) [N]')
+ax9.autoscale()
+
+ax10 = plt.subplot2grid((17, 3), (15, 0), colspan=3, rowspan=1)
+ax10.plot(t1,Fy1,color='black')
+ax10.plot(t2,Fy2,color='red')
+ax10.set_ylabel('Fy (Tool) [mm]')
+ax10.autoscale()
+
+ax11 = plt.subplot2grid((17, 3), (16, 0), colspan=3, rowspan=1)
+ax11.plot(t1,Fz1,color='black')
+ax11.plot(t2,Fz2,color='red')
+ax11.set_xlabel('t')
+ax11.set_ylabel('Fz (Tool) [mm]')
+ax11.autoscale()
+
+subplots_adjust(hspace=0)
+ax3.xaxis.set_major_formatter(NullFormatter())
+ax3.get_yticklabels()[0].set_alpha(0.)
+ax4.get_yticklabels()[0].set_alpha(0.)
+
+plt.show
+################################################################
+
+
