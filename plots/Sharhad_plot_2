@@ -1,0 +1,126 @@
+# -*- coding: utf-8 -*-
+
+import numpy as np
+import matplotlib.pyplot as plt
+import itertools
+import random, glob, os
+import matplotlib.cm as cm, IPython.display as IPdisplay 
+from mpl_toolkits.mplot3d import Axes3D
+from pylab import *
+
+#####################getting data##############################
+
+filename1 = input('Enter first file location: ')
+filename2 = input('Enter second file location: ')
+if os.path.isfile(filename1) and os.path.isfile(filename2):
+    
+    input_data = np.genfromtxt(filename1, delimiter=',', dtype = np.float64)
+    log_data = np.genfromtxt(filename2, skiprows = 2, delimiter=',',dtype = np.float64) 
+    
+    #'F:input_path.csv' these are where the file are stored on my computer
+    #'F:log.csv'
+################################################################
+    
+    t1 = []
+    t2 = []
+    count1 = 0
+    count2 = 0
+    length_input = len(input_data[:,0])
+    length_log = len(log_data[:,0])
+    i = 0.0
+    j = 0.0
+    while count1 < length_input:
+        t1.append(i)    
+        i += 0.15
+        count1 += 1
+    
+    while count2 < length_log:
+        t2.append(j)
+        j += 0.002 
+        count2 += 1
+        
+###################from the first chart#########################  
+    
+    x1 = np.round(input_data[:,7] * 1000)
+    y1 = np.round(input_data[:,8] * 1000)
+    z1 = np.round(input_data[:,9] * 1000)
+    
+    Fx1 = np.round(input_data[:,1], 2)
+    Fy1 = np.round(input_data[:,2], 2)
+    Fz1 = np.round(input_data[:,3], 2)
+    
+    #normalize
+    Px1 = [a - x1[0] for a in x1]
+    Py1 = [a - y1[0] for a in y1]
+    Pz1 = [a - z1[0] for a in z1]
+    
+###############from the second chart############################
+    
+    x2 = np.round(log_data[:,15]* 1000, 2) #msr data
+    y2 = np.round(log_data[:,16]* 1000, 2) #msr data
+    z2 = np.round(log_data[:,17]* 1000, 2) #msr data
+    
+    Fx2 = np.round(log_data[:,6], 2)
+    Fy2 = np.round(log_data[:,7], 2)
+    Fz2 = np.round(log_data[:,8], 2) 
+    
+    Dead_x = np.round(log_data[:,0], 2)
+    Dead_y = np.round(log_data[:,1], 2)
+    Dead_z = np.round(log_data[:,2], 2)
+    
+    Pid_x = np.round(log_data[:,18]*1000, 2)
+    Pid_y = np.round(log_data[:,19]*1000, 2)
+    Pid_z = np.round(log_data[:,20]*1000, 2)
+    
+    #normalize
+    Px2 = [a - x2[0] for a in x2]
+    Py2 = [a - y2[0] for a in y2]
+    Pz2 = [a - z2[0] for a in z2]
+    
+#########################Draws graph############################
+    
+    fig = plt.figure(figsize=(12,21))
+    
+    def Graph_3D(x_pos, x1, y1, z1, x2, y2, z2, Color1, Color2, Label, x_Label, y_Label, z_Label):
+        ax = plt.subplot2grid((17,3), (x_pos,0),colspan = 3, rowspan = 3, projection = '3d')
+        ax.plot(x1, y1, z1, color = Color1, label = Label)
+        ax.plot(x2 ,y2, z2, color=Color2)    
+        ax.set_xlabel(x_Label)
+        ax.set_ylabel(y_Label)
+        ax.set_zlabel(z_Label)
+        ax.autoscale()
+        plt.show
+        
+    def Graph_2D (x_pos, x1, y1, x2, y2, Color1, Color2, x_label, y_label):
+        ax = plt.subplot2grid((17,3), (x_pos, 0), colspan = 3, rowspan = 1)
+        ax.plot(x1, y1, color = Color1)
+        ax.plot(x2, y2, color = Color2)
+        ax.set_xlabel(x_label)    
+        ax.set_ylabel(y_label)
+        ax.autoscale()    
+        plt.show
+        
+#################################################################
+    #3D    
+    ax1 = Graph_3D (0, Px1, Py1, Pz1, Px2, Py2, Pz2, 'black', 'red', 'Position', 'X', 'Y', 'Z')
+    ax2 = Graph_3D (4, Fx1, Fy1, Fz1, Fx2, Fy2, Fz2, 'black', 'red', 'Force', 'FX', 'FY', 'FZ')
+    
+    #2D
+    ax3 = Graph_2D (8, t1, Px1, t2, Px2, 'black', 'red', ' ', 'X (Global) [mm]' )
+    ax4 = Graph_2D (9, t1, Py1, t2, Py2, 'black', 'red', ' ', 'Y (Global) [mm]')
+    ax5 = Graph_2D (10, t1, Pz1, t2, Pz2, 'black', 'red', ' ', 'Z (Global) [mm]')
+    ax6 = Graph_2D (11, t2, Pid_x, t2, Pid_x, 'black', 'black', ' ', 'PID X (Tool) [N]')
+    ax7 = Graph_2D (12, t2, Pid_y, t2, Pid_y, 'black', 'black', ' ', 'PID y (Tool) [N]')
+    ax8 = Graph_2D (13, t2, Pid_z, t2, Pid_z, 'black', 'black', ' ', 'PID z (Tool) [N]')
+    ax9 = Graph_2D (14, t1, Fx1, t2, Fx2, 'black', 'red', ' ', 'Fx (Tool) [N]')
+    ax10 = Graph_2D (15, t1, Fy1, t2, Fy2, 'black', 'red', ' ', 'Fy (Tool) [N]')
+    ax11 = Graph_2D (16, t1, Fz1, t2, Fz2, 'black', 'red', 't', 'Fz (Tool) [N]')
+    
+    subplots_adjust(hspace=0)
+   
+################################################################
+       
+   
+else:
+    print('Files do not exist')    
+    
